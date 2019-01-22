@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import * as am4core from "@amcharts/amcharts4/core";
-import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+import { HttpClient } from '@angular/common/http';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -9,130 +8,45 @@ import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 })
 export class LoginComponent implements OnInit {
 
-  constructor() { }
+  constructor(public http:HttpClient) { }
 
-/**
- * ---------------------------------------
- * This demo was created using amCharts 4.
- * 
- * For more information visit:
- * https://www.amcharts.com/
- * 
- * Documentation is available at:
- * https://www.amcharts.com/docs/v4/
- * ---------------------------------------
- */
+  public doughnutChartLabels:string[] = ['Download Sales', 'In-Store Sales', 'Mail-Order Sales'];
+  public doughnutChartData:number[] = [];
+  
+  public doughnutChartType:string = 'doughnut';
+  salesurl:string;
+  salesReq:any={};
+  salesRes:any={};
 
-// Themes begin
-am4core.useTheme(am4themes_animated);
-// Themes end
 
-var chart = am4core.create("chartdiv", am4charts.XYChart);
-chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
-chart.data = [
-  {
-    country: "USA",
-    visits: 23725
-  },
-  {
-    country: "China",
-    visits: 1882
-  },
-  {
-    country: "Japan",
-    visits: 1809
-  },
-  {
-    country: "Germany",
-    visits: 1322
-  },
-  {
-    country: "UK",
-    visits: 1122
-  },
-  {
-    country: "France",
-    visits: 1114
-  },
-  {
-    country: "India",
-    visits: 984
-  },
-  {
-    country: "Spain",
-    visits: 711
-  },
-  {
-    country: "Netherlands",
-    visits: 665
-  },
-  {
-    country: "Russia",
-    visits: 580
-  },
-  {
-    country: "South Korea",
-    visits: 443
-  },
-  {
-    country: "Canada",
-    visits: 441
+ 
+  // events
+  public chartClicked(e:any):void {
+    console.log(e);
   }
-];
+ 
+  public chartHovered(e:any):void {
+    console.log(e);
+  }
 
-var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-categoryAxis.renderer.grid.template.location = 0;
-categoryAxis.dataFields.category = "country";
 
-var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-valueAxis.min = 0;
-valueAxis.max = 24000;
-valueAxis.strictMinMax = true;
-valueAxis.renderer.minGridDistance = 30;
-// axis break
-var axisBreak = valueAxis.axisBreaks.create();
-axisBreak.startValue = 2100;
-axisBreak.endValue = 22900;
-axisBreak.breakSize = 0.005;
-
-// make break expand on hover
-var hoverState = axisBreak.states.create("hover");
-hoverState.properties.breakSize = 1;
-hoverState.properties.opacity = 0.1;
-hoverState.transitionDuration = 1500;
-
-axisBreak.defaultState.transitionDuration = 1000;
-/*
-// this is exactly the same, but with events
-axisBreak.events.on("over", function() {
-  axisBreak.animate(
-    [{ property: "breakSize", to: 1 }, { property: "opacity", to: 0.1 }],
-    1500,
-    am4core.ease.sinOut
-  );
-});
-axisBreak.events.on("out", function() {
-  axisBreak.animate(
-    [{ property: "breakSize", to: 0.005 }, { property: "opacity", to: 1 }],
-    1000,
-    am4core.ease.quadOut
-  );
-});*/
-
-var series = chart.series.push(new am4charts.ColumnSeries());
-series.dataFields.categoryX = "country";
-series.dataFields.valueY = "visits";
-series.columns.template.tooltipText = "{valueY.value}";
-series.columns.template.tooltipY = 0;
-series.columns.template.strokeOpacity = 0;
-
-// as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
-series.columns.template.adapter.add("fill", function(fill, target) {
-  return chart.colors.getIndex(target.dataItem.index);
-});
-
+  
   ngOnInit() {
+    this.salesurl= 'http://localhost:10010/sales';
+    this.http.post(this.salesurl,this.salesReq)
+    .subscribe(res =>{
+      this.salesRes=res;
+      this.doughnutChartData= this.salesRes.sales;
+
+console.log(JSON.stringify(res));
+//    }, 5000);
+
+     
+    }), ()=>{
+      console.log("inside error");
+    }
+  
     console.log("login works")
   }
 
